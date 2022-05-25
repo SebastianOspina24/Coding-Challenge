@@ -67,6 +67,13 @@ def check_session(activity, array_sessions):
     return array_sessions
 
 
+def create_user_session(activity):
+    """
+    create a new list of user sessions
+    """
+    return [add_session(activity)]
+
+
 def check_users_groups(activity, dictionary):
     """
     Check if the user is in the dictionary, if not its going to add it.
@@ -83,7 +90,7 @@ def check_users_groups(activity, dictionary):
             activity, dictionary[activity["user_id"]]
         )
     else:
-        pass
+        dictionary[activity["user_id"]] = create_user_session(activity)
     return dictionary
 
 
