@@ -1,4 +1,70 @@
+from pymysql import NULL
 import requests
+from datetime import datetime
+from datetime import timedelta
+
+
+def extend_session(activity, session):
+    """
+    Its going to extend the session updating the data
+
+    Args:
+        activity: activity that extend the session
+        session: sessions thats going to be extend
+    return:
+        sessions updated
+    """
+    if session["ended_at"] < activity["answered_at"]:
+        session["ended_at"] = activity["answered_at"]
+        session["duration_seconds"] = substract_times(
+            session["ended_at"], session["started_at"]
+        ).total_seconds()
+    session["activity_ids"].append(activity["id"])
+    return session
+
+
+def substract_times(start, end):
+    """
+    substract 2 date time in format iso
+    """
+    return datetime.fromisoformat(start) - datetime.fromisoformat(end)
+
+
+def check_session(activity, array_sessions):
+    """
+    Check if the activity is in the same session or in diferent
+
+    Args:
+        activity: activity thats need to be check
+        array_sessions: sort array of sessions where the last is the last active session where check
+    """
+    if substract_times(
+        activity["first_seen_at"], array_sessions[-1]["ended_at"]
+    ) <= timedelta(minutes=5):
+        array_sessions[-1] = extend_session(activity, array_sessions[-1])
+    else:
+        pass
+    return array_sessions
+
+
+def check_users_groups(activity, dictionary):
+    """
+    Check if the user is in the dictionary, if not its going to add it.
+
+    Args:
+        activity: Activity of a user
+        dictionary: dictionary in where check
+
+    Return:
+        dictionary adding the new user, or modifing the existing
+    """
+    if activity["user_id"] in dictionary:
+        dictionary[activity["user_id"]] = check_session(
+            activity, dictionary[activity["user_id"]]
+        )
+    else:
+        pass
+    return dictionary
 
 
 def build_user_sessions(arr):
@@ -8,7 +74,11 @@ def build_user_sessions(arr):
 
     Args:
         arr: array of activities.
+
+    return:
+        dictionary with user sessions
     """
+    arr = sorted(arr, key=lambda k: (k["user_id"], k["first_seen_at"]))
     user_sessions = dict()
     for i in arr:
         user_sessions = check_users_groups(i, user_sessions)
