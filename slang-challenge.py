@@ -124,7 +124,7 @@ def main():
         },
     )
     activites_response_json = activites_response.json()
-    print(activites_response_json)
+    print(build_user_sessions(activites_response_json.get("activities")))
     # requests.post(
     #     " https://api.slangapp.com/challenges/v1/activities/sessions",
     #     headers={
