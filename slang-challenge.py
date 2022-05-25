@@ -124,14 +124,16 @@ def main():
         },
     )
     activites_response_json = activites_response.json()
-    print(build_user_sessions(activites_response_json.get("activities")))
-    # requests.post(
-    #     " https://api.slangapp.com/challenges/v1/activities/sessions",
-    #     headers={
-    #         "Authorization": "Basic OTM6Q3FtUnNPeHFHQmkySkpoYzNYazdOeDd2MStKbjBCV0JUMmxqRURLc1FMOD0="
-    #     },
-    #     json=activites_response_json,
-    # )
+    user_sessions = {
+        "user_sessions": build_user_sessions(activites_response_json.get("activities"))
+    }
+    requests.post(
+        " https://api.slangapp.com/challenges/v1/activities/sessions",
+        headers={
+            "Authorization": "Basic OTM6Q3FtUnNPeHFHQmkySkpoYzNYazdOeDd2MStKbjBCV0JUMmxqRURLc1FMOD0="
+        },
+        json=user_sessions,
+    )
 
 
 main()
