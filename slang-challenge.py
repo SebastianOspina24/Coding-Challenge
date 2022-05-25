@@ -1,4 +1,3 @@
-from pymysql import NULL
 import requests
 from datetime import datetime
 from datetime import timedelta
@@ -30,6 +29,27 @@ def substract_times(start, end):
     return datetime.fromisoformat(start) - datetime.fromisoformat(end)
 
 
+def add_session(activity):
+    """
+    Create a new session
+
+    Args:
+        activity: activity that start the new session
+    return:
+        new session
+    """
+    session = {
+        "ended_at": activity["answered_at"],
+        "started_at": activity["first_seen_at"],
+        "activity_ids": [activity["id"]],
+        "duration_seconds": (
+            datetime.fromisoformat(activity["answered_at"])
+            - datetime.fromisoformat(activity["first_seen_at"])
+        ).total_seconds(),
+    }
+    return session
+
+
 def check_session(activity, array_sessions):
     """
     Check if the activity is in the same session or in diferent
@@ -43,7 +63,7 @@ def check_session(activity, array_sessions):
     ) <= timedelta(minutes=5):
         array_sessions[-1] = extend_session(activity, array_sessions[-1])
     else:
-        pass
+        array_sessions.append(add_session(activity))
     return array_sessions
 
 
